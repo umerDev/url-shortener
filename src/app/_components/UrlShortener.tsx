@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 import { api } from "~/trpc/react";
 
 export function UrlShortener() {
   const [latestUrl] = api.url.getLatest.useSuspenseQuery();
   const [copyStatus, setCopyStatus] = useState(""); // For copy feedback
+  const [baseUrl, setBaseUrl] = useState(""); // Store the base URL
+  const pathname = usePathname();
 
   const utils = api.useUtils();
   const [longUrl, setLongUrl] = useState("");
@@ -27,6 +30,14 @@ export function UrlShortener() {
     }
   }, [copyStatus]);
 
+  // Set base URL on client side
+  useEffect(() => {
+    // Only run in browser environment
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
+
   return (
     <div className="w-full max-w-xs">
       {latestUrl ? (
@@ -38,18 +49,18 @@ export function UrlShortener() {
           <div className="flex items-center gap-2 mb-4">
             <div className="flex-grow overflow-hidden">
               <a 
-                href={latestUrl.url} 
+                href={`/${latestUrl.url_hash}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-blue-300 hover:underline truncate block"
               >
-                {window.location.origin}/{latestUrl.url_hash}
+                {baseUrl}/{latestUrl.url_hash}
               </a>
             </div>
             
             <button 
               onClick={() => {
-                const shortUrl = `${window.location.origin}/${latestUrl.url_hash}`;
+                const shortUrl = `${baseUrl}/${latestUrl.url_hash}`;
                 navigator.clipboard.writeText(shortUrl)
                   .then(() => {
                     setCopyStatus("copied");
