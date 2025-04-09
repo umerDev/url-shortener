@@ -1,6 +1,8 @@
 import Link from "next/link";
 
-import { UrlShortener } from "~/app/_components/post";
+import { UrlShortener } from "~/app/_components/UrlShortener";
+import {GetAllUrls } from "~/app/_components/GetAllUrls";
+
 import { api, HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
@@ -15,10 +17,8 @@ export default async function Home() {
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
             URL Shortener
           </h1>
-     
-        
-
           <UrlShortener />
+          <GetAllUrls />
         </div>
       </main>
     </HydrateClient>

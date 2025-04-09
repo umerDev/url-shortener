@@ -31,4 +31,8 @@ export const urlRouter = createTRPCRouter({
 
     return url ?? null;
   }),
+
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.uRL.findMany();
+  }),
 });
