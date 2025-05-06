@@ -32,7 +32,32 @@ export const urlRouter = createTRPCRouter({
     return url ?? null;
   }),
 
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.uRL.findMany();
-  }),
+  getAll: publicProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().min(1).max(100).optional().default(10),
+          cursor: z.number().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 10;
+      const cursor = input?.cursor;
+
+      const items = await ctx.db.uRL.findMany({
+        take: limit + 1,
+        orderBy: { id: "asc" },
+        cursor: cursor ? { id: cursor } : undefined,
+        skip: cursor ? 1 : 0,
+      });
+
+      const hasNextPage = items.length > limit;
+      const results = hasNextPage ? items.slice(0, -1) : items;
+
+      return {
+        items: results,
+        nextCursor: hasNextPage ? results[results?.length - 1]?.id : null,
+      };
+    }),
 });
