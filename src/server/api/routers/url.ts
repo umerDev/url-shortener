@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -13,9 +14,8 @@ export const urlRouter = createTRPCRouter({
   create: publicProcedure
     .input(z.object({ url: z.string().url() }))
     .mutation(async ({ ctx, input }) => {
-      // Generate a unique hash for the URL
-      const url_hash = Math.random().toString(36).substring(2, 8);
-      
+      const url_hash = randomBytes(6).toString("base64").substring(0, 8);
+
       return ctx.db.uRL.create({
         data: {
           url: input.url,
